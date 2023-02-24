@@ -320,7 +320,7 @@
       <Version>2.8.2</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Web.WebView2">
-      <Version>1.0.1466-prerelease</Version>
+      <Version>1.0.1587.40</Version>
     </PackageReference>
     <PackageReference Include="NETStandard.Library">
       <Version>2.0.3</Version>
