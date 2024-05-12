@@ -15,8 +15,9 @@ Style="{StaticResource PivotTitleContentControlStyle}">
 
     <Grid>
         <TextBlock x:Name="ChangelogText" TextWrapping="WrapWholeWords">
-            • The app now uses Mica as the backdrop on Windows 10 as well! (although it's a different style of Mica than the one observed when using the app on Windows 11)<LineBreak/>
-            • Dependency updates<LineBreak/>
+            <LineBreak />
+            • Adds a Dark Mode variant of UTE Mica Glass<LineBreak />
+            • Dependency updates<LineBreak />
         </TextBlock>
     </Grid>
 </ContentDialog>
