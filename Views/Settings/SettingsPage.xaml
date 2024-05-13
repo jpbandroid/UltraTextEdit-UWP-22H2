@@ -130,7 +130,7 @@
 
                 <uc:SettingsBlockControl x:Name="aboutblock"
             Title="{x:Bind res:Resources.AppName}"
-            Description="10.0.22621.2861">
+            Description="10.0.22621.3007">
                     <uc:SettingsBlockControl.Icon>
                         <BitmapIcon UriSource="ms-appx:///Assets/utevericon.png" ShowAsMonochrome="False" Height="24" Width="24"/>
                     </uc:SettingsBlockControl.Icon>
