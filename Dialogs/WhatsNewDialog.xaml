@@ -16,7 +16,6 @@ Style="{StaticResource PivotTitleContentControlStyle}">
     <Grid>
         <TextBlock x:Name="ChangelogText" TextWrapping="WrapWholeWords">
             <LineBreak />
-            • Adds a Dark Mode variant of UTE Mica Glass<LineBreak />
             • Dependency updates<LineBreak />
         </TextBlock>
     </Grid>
