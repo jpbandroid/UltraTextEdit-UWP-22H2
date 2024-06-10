@@ -11,7 +11,7 @@
 
   <Identity
     Publisher="CN=jpb"
-    Version="10.0.25314.1378"  Name="JPB.Office.UTE.UWP"/>
+    Version="10.0.25314.1480"  Name="JPB.Office.UTE.UWP"/>
 
   <mp:PhoneIdentity PhoneProductId="d78e24ed-8c8d-469f-8fa2-4490fa2ef787" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
