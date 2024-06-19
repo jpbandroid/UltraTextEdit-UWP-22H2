@@ -96,7 +96,7 @@
                         FontWeight="Normal" Foreground="{ThemeResource SystemAccentColor}"/>
                     </StackPanel>
                 </Border>
-                <Grid x:Name="InsiderGrid">
+                <Grid x:Name="InsiderGrid" Visibility="Collapsed">
                     <Button Background="#FFFFC225" Width="50" Height="25" Padding="0" CornerRadius="8" Click="showinsiderinfo">
                         <Grid>
                             <TextBlock Text="DEV" TextAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"></TextBlock>

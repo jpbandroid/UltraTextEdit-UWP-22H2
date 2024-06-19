@@ -62,7 +62,7 @@
                         Grid.Column="1"
                         Foreground="{ThemeResource SystemControlDisabledBaseMediumLowBrush}"
                         Grid.Row="2"
-                        Text="Dev"/>
+                        Text="24H2 (Germanium)"/>
                         <TextBlock Margin="0,0,20,5" Grid.Row="3" x:Uid="InstalledOn" Text="Build Date"/>
                         <TextBlock 
 						Name="InstalledOn"
@@ -79,14 +79,15 @@
                         Foreground="{ThemeResource SystemControlDisabledBaseMediumLowBrush}"
                         Grid.Row="4"
                         Text="26100.1"/>
-                        <TextBlock Margin="0,0,20,5" Grid.Row="5" x:Uid="InsiderChannel" Text="Insider Channel"/>
+                        <TextBlock Margin="0,0,20,5" Grid.Row="5" x:Uid="InsiderChannel" Text="Insider Channel" Visibility="Collapsed"/>
                         <TextBlock 
 						Name="InsiderChannel"
                         Margin="0,0,0,5"
                         Grid.Column="1"
                         Foreground="{ThemeResource SystemControlDisabledBaseMediumLowBrush}"
                         Grid.Row="5"
-                        Text="Dev Channel"/>
+                        Text="Dev Channel"
+                            Visibility="Collapsed"/>
                     </Grid>
                 </muxc:Expander>
 
