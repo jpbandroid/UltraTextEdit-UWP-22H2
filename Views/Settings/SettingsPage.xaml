@@ -93,6 +93,14 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
                 </uc:SettingsBlockControl>
+                <uc:SettingsBlockControl Title="Spell check">
+                    <uc:SettingsBlockControl.Icon>
+                        <FontIcon Glyph="&#xF87B;" />
+                    </uc:SettingsBlockControl.Icon>
+                    <uc:SettingsBlockControl.SettingsActionableElement>
+                        <CheckBox x:Name="spellcheckBox" Checked="spellcheckBox_Checked" Unchecked="spellcheckBox_Unchecked" Margin="0,0,-100,0"/>
+                    </uc:SettingsBlockControl.SettingsActionableElement>
+                </uc:SettingsBlockControl>
                 <TextBlock Text="{x:Bind res:Resources.AppearenceHeaderName}" Margin="0,0,0,10" FontSize="18" FontWeight="SemiBold" />
 
                 <uc:SettingsBlockControl Title="{x:Bind res:Resources.ThemeSettingName}">
