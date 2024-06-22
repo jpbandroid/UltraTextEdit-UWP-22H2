@@ -85,6 +85,22 @@ namespace UltraTextEdit_UWP
 
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
 
+            if (localSettings.Values["SpellCheck"] != null)
+            {
+                if (localSettings.Values["SpellCheck"].ToString() == "On")
+                {
+                    editor.IsSpellCheckEnabled = true;
+                }
+                else
+                {
+                    editor.IsSpellCheckEnabled = false;
+                }
+            }
+            else
+            {
+                localSettings.Values["SpellCheck"] = "Off";
+            }
+
             var appViewTitleBar = ApplicationView.GetForCurrentView().TitleBar;
 
             appViewTitleBar.ButtonBackgroundColor = Colors.Transparent;
