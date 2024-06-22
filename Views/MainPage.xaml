@@ -1003,7 +1003,7 @@ VerticalAlignment="Top" HorizontalAlignment="Left" CornerRadius="5,5,5,5" ToolTi
                                         </Grid>
                                     </Flyout>
                                 </muxc:SplitButton.Flyout>
-                                <FontIcon Glyph="&#xE185;"/>
+                                <FontIcon Glyph="&#xE8D2;"/>
                             </muxc:SplitButton>
                         </AppBarElementContainer>
                         <AppBarSeparator />

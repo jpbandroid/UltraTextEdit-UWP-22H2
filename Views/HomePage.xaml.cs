@@ -161,7 +161,7 @@ namespace UltraTextEdit_UWP.Views
                 Title = "Localization & Accessbility",
                 Icon = "\uE774",
                 Tag = "LocAndAcc",
-                Description = $"You can contribute translations to {Strings.Resources.AppName}, and help make this app reach more countries! And elements in the app will be more accessible.\n\nNEW IN OCTOBER 2022 UPDATE:\nUltraTextEdit UWP has been translated into Czech, Slovak, Ukrainian, Hungarian, and Simplified Chinese\n\nNEW IN DECEMBER 2022 UPDATE:\nUsing UltraTextEdit UWP without a mouse just became easier! Use the new keyboard shortcuts/hotkeys to complete common actions in the app!"
+                Description = $"You can contribute translations to {Strings.Resources.AppName}, and help make this app reach more countries! And elements in the app will be more accessible.\n\nNEW IN OCTOBER 2022 UPDATE:\nUltraTextEdit UWP has been translated into Czech, Slovak, Ukrainian, Hungarian, and Simplified Chinese\n\nNEW IN DECEMBER 2022 UPDATE:\nUsing UltraTextEdit UWP without a mouse just became easier! Use the new keyboard shortcuts/hotkeys to complete common actions in the app!\n\nNEW IN JUNE 2024 UPDATE: You can now enable spellchecking in Settings to allow UTE UWP to proofread your documents for potential spelling errors."
             });
 
             WhatsNew.Add(new()
@@ -225,7 +225,7 @@ namespace UltraTextEdit_UWP.Views
                 Title = "Symbols",
                 Icon = "\uED58",
                 Tag = "Symbols",
-                Description = $"NEW IN FEBRUARY 2023 UPDATE: Now you can add the multiplication and division symbols straight into your document from the app's new symbols menu!"
+                Description = $"NEW IN FEBRUARY 2023 UPDATE: Now you can add the multiplication and division symbols straight into your document from the app's new symbols menu!\n\nNEW IN JUNE 2024 UPDATE:\nThis release redesigns the symbol insertion experience to be more touch-friendly and introduces a More Symbols dialog to insert additional symbols."
             });
 
             WhatsNew.Add(new()
@@ -242,6 +242,14 @@ namespace UltraTextEdit_UWP.Views
                 Icon = "\uE133",
                 Tag = "LocAndAcc",
                 Description = $"NEW IN OCTOBER 2023 UPDATE: This release adds bulleting options back into UTE UWP!!"
+            });
+
+            WhatsNew.Add(new()
+            {
+                Title = "Text Templates",
+                Icon = "\uE8D2",
+                Tag = "LocAndAcc",
+                Description = $"NEW IN JUNE 2024 UPDATE: This release allows you to use predefined text styles to create documents quicker and more easily!!"
             });
 
             IsListEmpty = list.Count <= 0;
