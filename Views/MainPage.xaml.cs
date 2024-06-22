@@ -1056,5 +1056,48 @@ namespace UltraTextEdit_UWP
             myListButton.Flyout.Hide();
             editor.Focus(FocusState.Keyboard);
         }
+
+        private void BackPicker_ColorChanged(object Sender, Windows.UI.Xaml.Controls.ColorChangedEventArgs EvArgs)
+        {
+            //Configure font highlight
+            if (!(editor == null))
+            {
+                var ST = editor.Document.Selection;
+                if (!(ST == null))
+                {
+                    _ = ST.CharacterFormat;
+                    var Br = new SolidColorBrush(BackPicker.Color);
+                    var CF = BackPicker.Color;
+                    if (BackAccent != null) BackAccent.Foreground = Br;
+                    ST.CharacterFormat.BackgroundColor = CF;
+                }
+            }
+        }
+
+        private void HighlightButton_Click(object Sender, RoutedEventArgs EvArgs)
+        {
+            //Configure font color
+            var BTN = Sender as Button;
+            var ST = editor.Document.Selection;
+            if (!(ST == null))
+            {
+                _ = ST.CharacterFormat.ForegroundColor;
+                var Br = BTN.Foreground;
+                BackAccent.Foreground = Br;
+                ST.CharacterFormat.BackgroundColor = (BTN.Foreground as SolidColorBrush).Color;
+            }
+        }
+
+        private void NullHighlightButton_Click(object Sender, RoutedEventArgs EvArgs)
+        {
+            //Configure font color
+            var ST = editor.Document.Selection;
+            if (!(ST == null))
+            {
+                _ = ST.CharacterFormat.ForegroundColor;
+                BackAccent.Foreground = new SolidColorBrush(Colors.Transparent);
+                ST.CharacterFormat.BackgroundColor = Colors.Transparent;
+            }
+        }
     }
 }
