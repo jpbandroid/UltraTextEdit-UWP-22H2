@@ -351,7 +351,7 @@
       <Version>8.2.2</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces">
-      <Version>9.0.0-preview.4.24266.19</Version>
+      <Version>9.0.0-preview.5.24306.7</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Net.Native.Compiler">
       <Version>2.2.12-rel-33220-00</Version>
@@ -377,7 +377,7 @@
       <Version>2.8.6</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Web.WebView2">
-      <Version>1.0.2584-prerelease</Version>
+      <Version>1.0.2646-prerelease</Version>
     </PackageReference>
     <PackageReference Include="NETStandard.Library">
       <Version>2.0.3</Version>
@@ -398,10 +398,10 @@
       <Version>7.0.0-preview.2.22152.2</Version>
     </PackageReference>
     <PackageReference Include="System.Text.Encodings.Web">
-      <Version>9.0.0-preview.4.24266.19</Version>
+      <Version>9.0.0-preview.5.24306.7</Version>
     </PackageReference>
     <PackageReference Include="System.Text.Json">
-      <Version>9.0.0-preview.4.24266.19</Version>
+      <Version>9.0.0-preview.5.24306.7</Version>
     </PackageReference>
     <PackageReference Include="System.Threading.Tasks.Extensions">
       <Version>4.5.4</Version>
