@@ -16,7 +16,10 @@ Style="{StaticResource PivotTitleContentControlStyle}">
     <Grid>
         <TextBlock x:Name="ChangelogText" TextWrapping="WrapWholeWords">
             <LineBreak />
-            • Dependency updates<LineBreak />
+            • Add text highlighting<LineBreak />
+            • Add More Symbols dialog<LineBreak />
+            • Add text templates<LineBreak />
+            • Add spellcheck<LineBreak />
         </TextBlock>
     </Grid>
 </ContentDialog>
