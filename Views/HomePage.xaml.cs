@@ -12,6 +12,8 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Core;
 using Windows.System;
 using Windows.ApplicationModel.DataTransfer;
+using MicaForUWP.Media;
+using UltraTextEdit_UWP.Helpers;
 
 namespace UltraTextEdit_UWP.Views
 {
@@ -29,6 +31,41 @@ namespace UltraTextEdit_UWP.Views
         public HomePage()
         {
             InitializeComponent();
+
+            if (BuildInfo.BeforeWin11)
+            {
+                if (App.Current.RequestedTheme == ApplicationTheme.Light)
+                {
+                    Application.Current.Resources["AppTitleBarBrush"] = new BackdropMicaBrush()
+                    {
+                        LuminosityOpacity = 0.8F,
+                        TintOpacity = 0F,
+                        BackgroundSource = BackgroundSource.WallpaperBackdrop,
+                        Opacity = 1,
+                        TintColor = Windows.UI.Color.FromArgb(255, 230, 230, 230),
+                        FallbackColor = Windows.UI.Color.FromArgb(255, 230, 230, 230)
+                    };
+                    this.Background = (Brush)Application.Current.Resources["AppTitleBarBrush"];
+                }
+                else
+                {
+                    Application.Current.Resources["AppTitleBarBrush"] = new BackdropMicaBrush()
+                    {
+                        LuminosityOpacity = 0.8F,
+                        TintOpacity = 0F,
+                        BackgroundSource = BackgroundSource.WallpaperBackdrop,
+                        Opacity = 1,
+                        TintColor = Windows.UI.Color.FromArgb(255, 25, 25, 25),
+                        FallbackColor = Windows.UI.Color.FromArgb(25, 25, 25, 25)
+                    };
+                    this.Background = (Brush)Application.Current.Resources["AppTitleBarBrush"];
+                }
+
+            }
+            else
+            {
+
+            }
 
             var appViewTitleBar = ApplicationView.GetForCurrentView().TitleBar;
 
@@ -105,17 +142,10 @@ namespace UltraTextEdit_UWP.Views
 
             WhatsNew.Add(new()
             {
-                Title = "New dialogs!",
-                Icon = "\uE775",
+                Title = "Bugfixes",
+                Icon = "\uEBE8",
                 Tag = "LocAndAcc",
-                Description = $"This release adds two brand new dialogs, both of which can also be launched via Help menu! One is the First Run dialog, which runs the first time this app is run. The second is the What's New dialog, a dialog that shows what has changed between builds."
-            });
-            WhatsNew.Add(new()
-            {
-                Title = "Redesigned app icon",
-                Icon = "\uE914",
-                Tag = "LocAndAcc",
-                Description = $"This release also redesigns the app icon of UltraTextEdit UWP to make it look more professional, indicating the vision for the future of the app (to have more Word-like features and maybe become a Word competitor)"
+                Description = $"Fix untabbed MainPage missing some features that are present in tabbed MainPage"
             });
             WhatsNew.Add(new()
             {

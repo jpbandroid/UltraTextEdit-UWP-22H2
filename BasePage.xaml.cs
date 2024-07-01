@@ -1,9 +1,11 @@
-﻿using Microsoft.UI.Xaml.Controls;
+﻿using MicaForUWP.Media;
+using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using UltraTextEdit_UWP.Helpers;
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Core;
 using Windows.Foundation;
@@ -36,6 +38,41 @@ namespace UltraTextEdit_UWP
         public BasePage()
         {
             InitializeComponent();
+
+            if (BuildInfo.BeforeWin11)
+            {
+                if (App.Current.RequestedTheme == ApplicationTheme.Light)
+                {
+                    Application.Current.Resources["AppTitleBarBrush"] = new BackdropMicaBrush()
+                    {
+                        LuminosityOpacity = 0.8F,
+                        TintOpacity = 0F,
+                        BackgroundSource = BackgroundSource.WallpaperBackdrop,
+                        Opacity = 1,
+                        TintColor = Windows.UI.Color.FromArgb(255, 230, 230, 230),
+                        FallbackColor = Windows.UI.Color.FromArgb(255, 230, 230, 230)
+                    };
+                    this.Background = (Brush)Application.Current.Resources["AppTitleBarBrush"];
+                }
+                else
+                {
+                    Application.Current.Resources["AppTitleBarBrush"] = new BackdropMicaBrush()
+                    {
+                        LuminosityOpacity = 0.8F,
+                        TintOpacity = 0F,
+                        BackgroundSource = BackgroundSource.WallpaperBackdrop,
+                        Opacity = 1,
+                        TintColor = Windows.UI.Color.FromArgb(255, 25, 25, 25),
+                        FallbackColor = Windows.UI.Color.FromArgb(25, 25, 25, 25)
+                    };
+                    this.Background = (Brush)Application.Current.Resources["AppTitleBarBrush"];
+                }
+
+            }
+            else
+            {
+
+            }
 
             Current = this;
 

@@ -19,7 +19,7 @@
     <WindowsXamlEnableOverview>true</WindowsXamlEnableOverview>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
-    <PackageCertificateThumbprint>A78C852FB829FC05329DF894AF8A7534805F315D</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>A4FEA4DBFE8442DD796CD59C4BC59612050DE20A</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <GenerateTestArtifacts>False</GenerateTestArtifacts>
@@ -137,6 +137,9 @@
     <Compile Include="Converters\IntToThickness.cs" />
     <Compile Include="Converters\BooleanToVisibility.cs" />
     <Compile Include="Converters\SettingsConverters.cs" />
+    <Compile Include="Dialogs\ComputeHash.xaml.cs">
+      <DependentUpon>ComputeHash.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dialogs\FirstRunDialog.xaml.cs" />
     <Compile Include="Dialogs\TableDialog.xaml.cs">
       <DependentUpon>TableDialog.xaml</DependentUpon>
@@ -144,6 +147,7 @@
     <Compile Include="Dialogs\WhatsNewDialog.xaml.cs" />
     <Compile Include="Helpers\BrushHelpers.cs" />
     <Compile Include="Helpers\BuildInfo.cs" />
+    <Compile Include="Helpers\EncryptorsDecryptors.cs" />
     <Compile Include="Helpers\Language.cs" />
     <Compile Include="Helpers\ResourceExtensions.cs" />
     <Compile Include="Helpers\RichEditHelpers.cs" />
@@ -152,6 +156,11 @@
     <Compile Include="Services\NavigationService.cs" />
     <Compile Include="Services\WhatsNewDisplayService.cs" />
     <Compile Include="Strings\Resources.cs" />
+    <Compile Include="UserControls\MessageBox.xaml.cs">
+      <DependentUpon>MessageBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\MessageBoxesGrid.cs" />
+    <Compile Include="UserControls\MessageBoxValidation.cs" />
     <Compile Include="UserControls\SettingsBlockControl.xaml.cs">
       <DependentUpon>SettingsBlockControl.xaml</DependentUpon>
     </Compile>
@@ -182,6 +191,9 @@
     <Compile Include="Views\Settings\SettingsPage.xaml.cs">
       <DependentUpon>SettingsPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Settings\VelocityIDsPage.xaml.cs">
+      <DependentUpon>VelocityIDsPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\UTEUpdate\UTEUpdate.xaml.cs">
       <DependentUpon>UTEUpdate.xaml</DependentUpon>
     </Compile>
@@ -200,6 +212,20 @@
     <Content Include="Assets\LargeTile.scale-150.png" />
     <Content Include="Assets\LargeTile.scale-200.png" />
     <Content Include="Assets\LargeTile.scale-400.png" />
+    <Content Include="Assets\listnumbersimages\abc.png" />
+    <Content Include="Assets\listnumbersimages\ABCB.png" />
+    <Content Include="Assets\listnumbersimages\dark\abc.png" />
+    <Content Include="Assets\listnumbersimages\dark\ABCB.png" />
+    <Content Include="Assets\listnumbersimages\dark\dot.png" />
+    <Content Include="Assets\listnumbersimages\dark\iii.png" />
+    <Content Include="Assets\listnumbersimages\dark\IIII.png" />
+    <Content Include="Assets\listnumbersimages\dark\none.png" />
+    <Content Include="Assets\listnumbersimages\dark\number.png" />
+    <Content Include="Assets\listnumbersimages\dot.png" />
+    <Content Include="Assets\listnumbersimages\iii.png" />
+    <Content Include="Assets\listnumbersimages\IIII.png" />
+    <Content Include="Assets\listnumbersimages\none.png" />
+    <Content Include="Assets\listnumbersimages\number.png" />
     <Content Include="Assets\rtf-icon.png" />
     <Content Include="Assets\SmallTile.scale-100.png" />
     <Content Include="Assets\SmallTile.scale-125.png" />
@@ -260,6 +286,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Dialogs\ComputeHash.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Dialogs\FirstRunDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -272,11 +301,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="UserControls\MessageBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ImageOptionsDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\NonTabbedMainPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Settings\VelocityIDsPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -318,24 +355,36 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ColorCode.Core">
-      <Version>2.0.14</Version>
+      <Version>2.0.15</Version>
     </PackageReference>
     <PackageReference Include="ColorCode.UWP">
-      <Version>2.0.14</Version>
+      <Version>2.0.15</Version>
+    </PackageReference>
+    <PackageReference Include="CommunityToolkit.Common">
+      <Version>8.2.2</Version>
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm">
-      <Version>8.2.0</Version>
+      <Version>8.2.2</Version>
+    </PackageReference>
+    <PackageReference Include="CommunityToolkit.Uwp.Controls.Segmented">
+      <Version>8.1.240606-rc</Version>
+    </PackageReference>
+    <PackageReference Include="CommunityToolkit.Uwp.Controls.SettingsControls">
+      <Version>8.1.240606-rc</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces">
-      <Version>7.0.0</Version>
+      <Version>9.0.0-preview.5.24306.7</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Net.Native.Compiler">
-      <Version>2.2.12-rel-31116-00</Version>
+      <Version>2.2.12-rel-33220-00</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.Platforms">
-      <Version>7.0.3</Version>
+      <Version>8.0.0-preview.7.23375.6</Version>
+    </PackageReference>
+    <PackageReference Include="MicaForUWP">
+      <Version>0.1.10</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.2.14</Version>
@@ -347,10 +396,10 @@
       <Version>7.1.3</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.UI.Xaml">
-      <Version>2.8.4</Version>
+      <Version>2.8.6</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Web.WebView2">
-      <Version>1.0.1823.32</Version>
+      <Version>1.0.2584-prerelease</Version>
     </PackageReference>
     <PackageReference Include="NETStandard.Library">
       <Version>2.0.3</Version>
@@ -371,16 +420,16 @@
       <Version>7.0.0-preview.2.22152.2</Version>
     </PackageReference>
     <PackageReference Include="System.Text.Encodings.Web">
-      <Version>7.0.0</Version>
+      <Version>9.0.0-preview.5.24306.7</Version>
     </PackageReference>
     <PackageReference Include="System.Text.Json">
-      <Version>7.0.3</Version>
+      <Version>9.0.0-preview.5.24306.7</Version>
     </PackageReference>
     <PackageReference Include="System.Threading.Tasks.Extensions">
       <Version>4.5.4</Version>
     </PackageReference>
     <PackageReference Include="Win2D.uwp">
-      <Version>1.27.0-preview3</Version>
+      <Version>1.27.1</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
@@ -394,8 +443,8 @@
     <PRIResource Include="Strings\zh-CN\Resources.resw" />
     <PRIResource Include="Strings\it-IT\Resources.resw" />
     <PRIResource Include="Strings\ro-RO\Resources.resw" />
-    <PRIResource Include="Strings\tr-TR\Resources.resw" />
     <None Include="UltraTextEdit UWP_TemporaryKey.pfx" />
+    <PRIResource Include="Strings\tr-TR\Resources.resw" />
     <None Include="WordpadUWP_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup />

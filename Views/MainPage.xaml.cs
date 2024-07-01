@@ -29,6 +29,10 @@ using System.Text;
 using Windows.UI.Xaml.Media.Imaging;
 using UltraTextEdit_UWP.Dialogs;
 using System.Runtime.CompilerServices;
+using Microsoft.UI.Xaml.Controls;
+using System.Diagnostics;
+using System.IO;
+using MicaForUWP.Media;
 
 namespace UltraTextEdit_UWP
 {
@@ -39,10 +43,46 @@ namespace UltraTextEdit_UWP
         string appTitleStr = Strings.Resources.AppName;
         string fileNameWithPath = "";
         string originalDocText = "";
+        public string docText;
 
         public MainPage()
         {
             InitializeComponent();
+
+            if (BuildInfo.BeforeWin11)
+            {
+                if (App.Current.RequestedTheme == ApplicationTheme.Light)
+                {
+                    Application.Current.Resources["AppTitleBarBrush"] = new BackdropMicaBrush()
+                    {
+                        LuminosityOpacity = 0.8F,
+                        TintOpacity = 0F,
+                        BackgroundSource = BackgroundSource.WallpaperBackdrop,
+                        Opacity = 1,
+                        TintColor = Windows.UI.Color.FromArgb(255, 230, 230, 230),
+                        FallbackColor = Windows.UI.Color.FromArgb(255, 230, 230, 230)
+                    };
+                    this.Background = (Brush)Application.Current.Resources["AppTitleBarBrush"];
+                }
+                else
+                {
+                    Application.Current.Resources["AppTitleBarBrush"] = new BackdropMicaBrush()
+                    {
+                        LuminosityOpacity = 0.8F,
+                        TintOpacity = 0F,
+                        BackgroundSource = BackgroundSource.WallpaperBackdrop,
+                        Opacity = 1,
+                        TintColor = Windows.UI.Color.FromArgb(255, 25, 25, 25),
+                        FallbackColor = Windows.UI.Color.FromArgb(25, 25, 25, 25)
+                    };
+                    this.Background = (Brush)Application.Current.Resources["AppTitleBarBrush"];
+                }
+
+            }
+            else
+            {
+
+            }
 
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
 
@@ -68,16 +108,36 @@ namespace UltraTextEdit_UWP
 
             ShareSourceLoad();
 
-            var settings = new SettingsPage();
-
-            if (settings.gameenabled == true)
+            var LocalSettings = ApplicationData.Current.LocalSettings;
+            if (LocalSettings.Values["SpellCheck"] != null)
             {
-                textsplitview.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "ms-appx:///Assets/gamerbackground.png")), Stretch = Stretch.Fill };
+                if (LocalSettings.Values["SpellCheck"].ToString() == "On")
+                {
+                    editor.IsSpellCheckEnabled = true;
+                }
+                else
+                {
+                    editor.IsSpellCheckEnabled = false;
+                }
             } else
             {
-                textsplitview.Background = new SolidColorBrush(Colors.Transparent);
+                LocalSettings.Values["SpellCheck"] = "Off";
             }
-
+                if (LocalSettings.Values["NewFindReplaceVID"] != null)
+                {
+                    if (LocalSettings.Values["NewFindReplaceVID"].ToString() == "On")
+                    {
+                        findreplacepanel.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        findreplacepanel.Visibility = Visibility.Collapsed;
+                    }
+                }
+                else
+                {
+                    LocalSettings.Values["NewFindReplaceVID"] = "Off";
+                }
         }
 
         private void CoreTitleBar_LayoutMetricsChanged(CoreApplicationViewTitleBar sender, object args)
@@ -141,11 +201,14 @@ namespace UltraTextEdit_UWP
                 savePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
 
                 // Dropdown of file types the user can save the file as
-                savePicker.FileTypeChoices.Add("Rich Text", new List<string>() { ".rtf" });
-                savePicker.FileTypeChoices.Add("Plain Text", new List<string>() { ".txt" });
+                savePicker.FileTypeChoices.Add("Rich Text Format  (.rtf)", new List<string>() { ".rtf" });
+                savePicker.FileTypeChoices.Add("Plain Text  (.txt)", new List<string>() { ".txt" });
+                //  savePicker.FileTypeChoices.Add("OpenDocument Text   .odt", new List<string>() { ".odt" });
+                savePicker.FileTypeChoices.Add("Office Open XML Document   (.docx)", new List<string>() { ".docx" });
 
                 // Default file name if the user does not type one in or select a file to replace
                 savePicker.SuggestedFileName = "New Document";
+
 
                 StorageFile file = await savePicker.PickSaveFileAsync();
                 if (file != null)
@@ -154,23 +217,55 @@ namespace UltraTextEdit_UWP
                     // finish making changes and call CompleteUpdatesAsync.
                     CachedFileManager.DeferUpdates(file);
                     // write to file
-                    using (IRandomAccessStream randAccStream = await file.OpenAsync(FileAccessMode.ReadWrite))
-                    
-                    if (file.Name.EndsWith(".txt"))
+                    using (Windows.Storage.Streams.IRandomAccessStream randAccStream =
+                        await file.OpenAsync(Windows.Storage.FileAccessMode.ReadWrite))
+                        switch (file.FileType)
                         {
-                            editor.Document.SaveToStream(Windows.UI.Text.TextGetOptions.None, randAccStream);
+                            case ".rtf":
+                                // RTF file, format for it
+                                {
+                                    editor.Document.SaveToStream(Windows.UI.Text.TextGetOptions.FormatRtf, randAccStream);
+                                    randAccStream.Dispose();
+                                }
+                                break;
+                            case ".txt":
+                                // TXT File, save as plain text
+                                {
+                                    using (IOutputStream outputStream = randAccStream.GetOutputStreamAt(0))
+                                    {
+                                        using (DataWriter dataWriter = new DataWriter(outputStream))
+                                        {
+                                            // Get the text content from the RichEditBox
+                                            editor.Document.GetText(Windows.UI.Text.TextGetOptions.None, out string text);
+
+                                            // Write the text to the file with UTF-8 encoding
+                                            dataWriter.WriteString(text);
+                                            dataWriter.UnicodeEncoding = Windows.Storage.Streams.UnicodeEncoding.Utf8;
+
+                                            // Save the changes
+                                            await dataWriter.StoreAsync();
+                                            await outputStream.FlushAsync();
+                                        }
+                                    }
+                                }
+                                break;
+                            case ".docx":
+                                // TXT File, disable RTF formatting so that this is plain text
+                                {
+
+                                    randAccStream.Dispose();
+                                }
+                                break;
                         }
-                        else
-                        {
-                            editor.Document.SaveToStream(Windows.UI.Text.TextGetOptions.FormatRtf, randAccStream);
-                        }
+
 
                     // Let Windows know that we're finished changing the file so the
                     // other app can update the remote version of the file.
                     FileUpdateStatus status = await CachedFileManager.CompleteUpdatesAsync(file);
                     if (status != FileUpdateStatus.Complete)
                     {
-                        Windows.UI.Popups.MessageDialog errorBox = new("File " + file.Name + " couldn't be saved.");
+                        Windows.UI.Popups.MessageDialog errorBox =
+                            new Windows.UI.Popups.MessageDialog("File " + file.Name + " couldn't be saved.");
                         await errorBox.ShowAsync();
                     }
                     saved = true;
@@ -195,10 +290,12 @@ namespace UltraTextEdit_UWP
                             if (file.Name.EndsWith(".txt"))
                             {
                                 editor.Document.SaveToStream(TextGetOptions.None, randAccStream);
+                                randAccStream.Dispose();
                             }
                             else
                             {
                                 editor.Document.SaveToStream(TextGetOptions.FormatRtf, randAccStream);
+                                randAccStream.Dispose();
                             }
 
 
@@ -207,14 +304,15 @@ namespace UltraTextEdit_UWP
                         FileUpdateStatus status = await CachedFileManager.CompleteUpdatesAsync(file);
                         if (status != FileUpdateStatus.Complete)
                         {
-                            Windows.UI.Popups.MessageDialog errorBox = new("File " + file.Name + " couldn't be saved.");
+                            Windows.UI.Popups.MessageDialog errorBox =
+                                new Windows.UI.Popups.MessageDialog("File " + file.Name + " couldn't be saved.");
                             await errorBox.ShowAsync();
                         }
                         saved = true;
                         AppTitle.Text = file.Name + " - " + appTitleStr;
                         Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.Remove("CurrentlyOpenFile");
                     }
-                } 
+                }
                 catch (Exception)
                 {
                     SaveFile(true);
@@ -312,6 +410,19 @@ namespace UltraTextEdit_UWP
             editor.AlignSelectedTo(RichEditHelpers.AlignMode.Left);
         }
 
+        private void AlignJustifyButton_Click(object sender, RoutedEventArgs e)
+        {
+            var ST = editor.Document.Selection;
+            if (ST != null)
+            {
+                var CF = ST.ParagraphFormat.Alignment;
+                if (CF != ParagraphAlignment.Justify) CF = ParagraphAlignment.Justify;
+                else CF = ParagraphAlignment.Left;
+                ST.ParagraphFormat.Alignment = CF;
+            }
+        }
+
+
         private void FindBoxHighlightMatches()
         {
             FindBoxRemoveHighlights();
@@ -324,6 +435,16 @@ namespace UltraTextEdit_UWP
             {
                 ITextRange searchRange = editor.Document.GetRange(0, 0);
                 while (searchRange.FindText(textToFind, TextConstants.MaxUnitCount, FindOptions.None) > 0)
+                {
+                    searchRange.CharacterFormat.BackgroundColor = highlightBackgroundColor;
+                    searchRange.CharacterFormat.ForegroundColor = highlightForegroundColor;
+                }
+            }
+            string textToFind2 = find.Text;
+            if (textToFind2 != null)
+            {
+                ITextRange searchRange = editor.Document.GetRange(0, 0);
+                while (searchRange.FindText(textToFind2, TextConstants.MaxUnitCount, FindOptions.None) > 0)
                 {
                     searchRange.CharacterFormat.BackgroundColor = highlightBackgroundColor;
                     searchRange.CharacterFormat.ForegroundColor = highlightForegroundColor;
@@ -357,7 +478,7 @@ namespace UltraTextEdit_UWP
         private async void OpenButton_Click(object sender, RoutedEventArgs e)
         {
             // Open a text file.
-            FileOpenPicker open = new();
+            FileOpenPicker open = new FileOpenPicker();
             open.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
             open.FileTypeFilter.Add(".rtf");
             open.FileTypeFilter.Add(".txt");
@@ -366,15 +487,43 @@ namespace UltraTextEdit_UWP
 
             if (file != null)
             {
-                using (IRandomAccessStream randAccStream = await file.OpenAsync(FileAccessMode.ReadWrite))
+                string fileExtension = file.FileType.ToLower(); // Get the file extension in lowercase
+
+                if (fileExtension == ".docx")
                 {
-                    IBuffer buffer = await FileIO.ReadBufferAsync(file);
-                    var reader = DataReader.FromBuffer(buffer);
-                    reader.UnicodeEncoding = Windows.Storage.Streams.UnicodeEncoding.Utf8;
-                    string text = reader.ReadString(buffer.Length);
-                    // Load the file into the Document property of the RichEditBox.
-                    editor.Document.LoadFromStream(TextSetOptions.FormatRtf, randAccStream);
-                    //editor.Document.SetText(Windows.UI.Text.TextSetOptions.FormatRtf, text);
+                    Debug.WriteLine("Not Implemented yet :/");
+                }
+                else if (fileExtension == ".rtf" || fileExtension == ".odt")
+                {
+                    // Handle other file types (e.g., .rtf, .txt, .odt) loading here
+                    using (IRandomAccessStream randAccStream = await file.OpenAsync(FileAccessMode.ReadWrite))
+                    {
+                        IBuffer buffer = await FileIO.ReadBufferAsync(file);
+                        var reader = DataReader.FromBuffer(buffer);
+                        reader.UnicodeEncoding = Windows.Storage.Streams.UnicodeEncoding.Utf8;
+                        string text = reader.ReadString(buffer.Length);
+                        // Load the file into the Document property of the RichEditBox.
+                        editor.Document.LoadFromStream(TextSetOptions.FormatRtf, randAccStream);
+                    }
+                }
+                else if (fileExtension == ".txt")
+                {
+                    // Handle other file types (e.g., .rtf, .txt, .odt) loading here
+                    using (IRandomAccessStream randAccStream = await file.OpenAsync(FileAccessMode.ReadWrite))
+                    {
+                        using (Stream stream = randAccStream.AsStreamForRead())
+                        {
+                            // Use StreamReader with the appropriate encoding (e.g., UTF-8)
+                            using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
+                            {
+                                string text = await reader.ReadToEndAsync();
+
+                                // Load the file into the Document property of the RichEditBox.
+                                editor.Document.SetText(TextSetOptions.None, text);
+                            }
+                        }
+                    }
+                        (BasePage.Current.Tabs.TabItems[BasePage.Current.Tabs.SelectedIndex] as TabViewItem).Header = file.Name;
                     AppTitle.Text = file.Name + " - " + appTitleStr;
                     fileNameWithPath = file.Path;
                 }
@@ -426,13 +575,18 @@ namespace UltraTextEdit_UWP
         {
             // Extract the color of the button that was clicked.
             Button clickedColor = (Button)sender;
-            var rectangle = (Windows.UI.Xaml.Shapes.Rectangle)clickedColor.Content;
+            var borderone = (Windows.UI.Xaml.Controls.Border)clickedColor.Content;
+            var bordertwo = (Windows.UI.Xaml.Controls.Border)borderone.Child;
+            var rectangle = (Windows.UI.Xaml.Shapes.Rectangle)bordertwo.Child;
             var color = (rectangle.Fill as SolidColorBrush).Color;
-
             editor.Document.Selection.CharacterFormat.ForegroundColor = color;
-
-            fontColorButton.Flyout.Hide();
+            //FontColorMarker.SetValue(ForegroundProperty, new SolidColorBrush(color));
             editor.Focus(FocusState.Keyboard);
+        }
+
+        private void fontcolorsplitbutton_Click(Microsoft.UI.Xaml.Controls.SplitButton sender, Microsoft.UI.Xaml.Controls.SplitButtonClickEventArgs args)
+        {
+            // If you see this, remind me to look into the splitbutton color applying logic
         }
 
         private void AddLinkButton_Click(object sender, RoutedEventArgs e)
@@ -469,17 +623,10 @@ namespace UltraTextEdit_UWP
             editor.Document.Redo();
         }
 
-        private async Task DisplayAboutDialog()
+        private Task DisplayAboutDialog()
         {
-            ContentDialog aboutDialog = new()
-            {
-                Title = appTitleStr,
-                Content = $"Version {typeof(App).GetTypeInfo().Assembly.GetName().Version}\n\n© 2021-2023 jpb",
-                CloseButtonText = "OK",
-                DefaultButton = ContentDialogButton.Close
-            };
-
-            await aboutDialog.ShowAsync();
+            AboutBox.Open();
+            return Task.CompletedTask;
         }
 
         public async Task ShowUnsavedDialog()
@@ -731,9 +878,31 @@ namespace UltraTextEdit_UWP
 
         private void editor_SelectionChanged(object sender, RoutedEventArgs e)
         {
+            var ST = editor.Document.Selection;
             BoldButton.IsChecked = editor.Document.Selection.CharacterFormat.Bold == FormatEffect.On;
             ItalicButton.IsChecked = editor.Document.Selection.CharacterFormat.Italic == FormatEffect.On;
             UnderlineButton.IsChecked = editor.Document.Selection.CharacterFormat.Underline == UnderlineType.Single;
+            //Selected words
+            if (ST.Length > 0 || ST.Length < 0)
+            {
+                SelWordGrid.Visibility = Visibility.Visible;
+                editor.Document.Selection.GetText(TextGetOptions.None, out var seltext);
+                var selwordcount = seltext.Split(new char[] { ' ', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries).Length;
+                SelWordCount.Text = $"Selected words: {selwordcount}";
+            }
+            else
+            {
+                SelWordGrid.Visibility = Visibility.Collapsed;
+            }
+            editor.Document.GetText(TextGetOptions.None, out var text);
+            if (text.Length > 0)
+            {
+                var wordcount = text.Split(new char[] { ' ', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries).Length;
+                WordCount.Text = $"Word count: {wordcount}";
+            } else
+            {
+                WordCount.Text = $"Word count: 0";
+            }
         }
 
         //To see this code in action, add a call to ShareSourceLoad to your constructor or other
@@ -921,5 +1090,468 @@ namespace UltraTextEdit_UWP
             var dialog = new WhatsNewDialog();
             dialog.ShowAsync();
         }
+
+        private void NoneNumeral_Click(object sender, RoutedEventArgs e)
+        {
+            editor.Document.Selection.ParagraphFormat.ListType = MarkerType.None;
+            myListButton.IsChecked = false;
+            myListButton.Flyout.Hide();
+            editor.Focus(FocusState.Keyboard);
+        }
+
+        private void DottedNumeral_Click(object sender, RoutedEventArgs e)
+        {
+            editor.Document.Selection.ParagraphFormat.ListType = MarkerType.Bullet;
+            myListButton.IsChecked = true;
+            myListButton.Flyout.Hide();
+            editor.Focus(FocusState.Keyboard);
+        }
+
+        private void NumberNumeral_Click(object sender, RoutedEventArgs e)
+        {
+            editor.Document.Selection.ParagraphFormat.ListType = MarkerType.Arabic;
+            myListButton.IsChecked = true;
+            myListButton.Flyout.Hide();
+            editor.Focus(FocusState.Keyboard);
+        }
+
+        private void LetterSmallNumeral_Click(object sender, RoutedEventArgs e)
+        {
+            editor.Document.Selection.ParagraphFormat.ListType = MarkerType.LowercaseEnglishLetter;
+            myListButton.IsChecked = true;
+            myListButton.Flyout.Hide();
+            editor.Focus(FocusState.Keyboard);
+        }
+
+        private void LetterBigNumeral_Click(object sender, RoutedEventArgs e)
+        {
+            editor.Document.Selection.ParagraphFormat.ListType = MarkerType.UppercaseEnglishLetter;
+            myListButton.IsChecked = true;
+            myListButton.Flyout.Hide();
+            editor.Focus(FocusState.Keyboard);
+        }
+
+        private void SmalliNumeral_Click(object sender, RoutedEventArgs e)
+        {
+            editor.Document.Selection.ParagraphFormat.ListType = MarkerType.LowercaseRoman;
+            myListButton.IsChecked = true;
+            myListButton.Flyout.Hide();
+            editor.Focus(FocusState.Keyboard);
+        }
+
+        private void BigINumeral_Click(object sender, RoutedEventArgs e)
+        {
+            editor.Document.Selection.ParagraphFormat.ListType = MarkerType.UppercaseRoman;
+            myListButton.IsChecked = true;
+            myListButton.Flyout.Hide();
+            editor.Focus(FocusState.Keyboard);
+        }
+
+        private void BackPicker_ColorChanged(object Sender, Windows.UI.Xaml.Controls.ColorChangedEventArgs EvArgs)
+        {
+            //Configure font highlight
+            if (!(editor == null))
+            {
+                var ST = editor.Document.Selection;
+                if (!(ST == null))
+                {
+                    _ = ST.CharacterFormat;
+                    var Br = new SolidColorBrush(BackPicker.Color);
+                    var CF = BackPicker.Color;
+                    if (BackAccent != null) BackAccent.Foreground = Br;
+                    ST.CharacterFormat.BackgroundColor = CF;
+                }
+            }
+        }
+
+        private void HighlightButton_Click(object Sender, RoutedEventArgs EvArgs)
+        {
+            //Configure font color
+            var BTN = Sender as Button;
+            var ST = editor.Document.Selection;
+            if (!(ST == null))
+            {
+                _ = ST.CharacterFormat.ForegroundColor;
+                var Br = BTN.Foreground;
+                BackAccent.Foreground = Br;
+                ST.CharacterFormat.BackgroundColor = (BTN.Foreground as SolidColorBrush).Color;
+            }
+        }
+
+        private void NullHighlightButton_Click(object Sender, RoutedEventArgs EvArgs)
+        {
+            //Configure font color
+            var ST = editor.Document.Selection;
+            if (!(ST == null))
+            {
+                _ = ST.CharacterFormat.ForegroundColor;
+                BackAccent.Foreground = new SolidColorBrush(Colors.Transparent);
+                ST.CharacterFormat.BackgroundColor = Colors.Transparent;
+            }
+        }
+
+        private void HyperlinkButton_Click_1(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void HyperlinkButton_Click_2(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void HyperlinkButton_Click_3(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void HyperlinkButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void find_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            FindBoxHighlightMatches();
+        }
+
+        private void replace_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        {
+            editor.Replace(false, replace.Text);
+        }
+
+        private void AppBarButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ReplacePanel.Visibility == Visibility.Visible)
+            {
+                ReplacePanel.Visibility = Visibility.Collapsed;
+                buticon.Glyph = "\uE7B3";
+                ToolTipService.SetToolTip(replacecontrol, "Show Replace box");
+            }
+            else
+            {
+                ReplacePanel.Visibility = Visibility.Visible;
+                buticon.Glyph = "\uED1A";
+                ToolTipService.SetToolTip(replacecontrol, "Hide Replace box");
+            }
+        }
+
+        private void Autobutton_Click(object sender, RoutedEventArgs e)
+        {
+            // Extract the color of the button that was clicked.
+            var color = Application.Current.Resources["TextFillColorPrimary"];
+            editor.Document.Selection.CharacterFormat.ForegroundColor = (Windows.UI.Color)color;
+            //FontColorMarker.SetValue(ForegroundProperty, new SolidColorBrush(color));
+            editor.Focus(FocusState.Keyboard);
+        }
+
+        private void ComputeHash_Click(object sender, RoutedEventArgs e)
+        {
+            editor.TextDocument.GetText(TextGetOptions.NoHidden, out docText);
+            ContentDialog dialog = new ContentDialog();
+            dialog.Title = "Compute hashes";
+            dialog.Content = new ComputeHash();
+            dialog.CloseButtonText = "Close";
+            dialog.DefaultButton = ContentDialogButton.Close;
+            dialog.ShowAsync();
+        }
+
+        #region Templates
+
+        private void Template1_Click(object Sender, RoutedEventArgs EvArgs)
+        {
+            //Normal
+            var ST = editor.Document.Selection;
+            if (!(ST == null))
+            {
+                var CF = ST.CharacterFormat;
+                CF.Bold = FormatEffect.Off;
+
+                CF.Italic = FormatEffect.Off;
+                CF.Name = "Segoe UI";
+
+                CF.Outline = FormatEffect.Off;
+                CF.Size = (float)14;
+                CF.Underline = UnderlineType.None;
+                ST.CharacterFormat = CF;
+                TempFlyout.Hide();
+            }
+        }
+
+        private void Template2_Click(object Sender, RoutedEventArgs EvArgs)
+        {
+            //Title
+            var ST = editor.Document.Selection;
+            if (!(ST == null))
+            {
+                var CF = ST.CharacterFormat;
+                var PF = ST.ParagraphFormat;
+                PF.Alignment = ParagraphAlignment.Center;
+                CF.Bold = FormatEffect.Off;
+                CF.Italic = FormatEffect.Off;
+                CF.Name = "Segoe UI";
+
+                CF.Outline = FormatEffect.Off;
+                CF.Size = 28;
+                CF.Underline = UnderlineType.None;
+                ST.CharacterFormat = CF;
+                TempFlyout.Hide();
+            }
+        }
+
+        private void Template3_Click(object Sender, RoutedEventArgs EvArgs)
+        {
+            //Title 2
+            var ST = editor.Document.Selection;
+            if (!(ST == null))
+            {
+                var CF = ST.CharacterFormat;
+                var PF = ST.ParagraphFormat;
+                PF.Alignment = ParagraphAlignment.Center;
+                CF.Bold = FormatEffect.Off;
+
+                CF.Italic = FormatEffect.Off;
+                CF.Name = "Segoe UI";
+
+                CF.Outline = FormatEffect.Off;
+                CF.Size = 22;
+                CF.Underline = UnderlineType.None;
+                ST.CharacterFormat = CF;
+                TempFlyout.Hide();
+            }
+        }
+
+        private void Template4_Click(object Sender, RoutedEventArgs EvArgs)
+        {
+            //Important
+            var ST = editor.Document.Selection;
+            if (!(ST == null))
+            {
+                var CF = ST.CharacterFormat;
+                CF.Bold = FormatEffect.On;
+
+                CF.Italic = FormatEffect.On;
+                CF.Name = "Segoe UI";
+
+                CF.Outline = FormatEffect.Off;
+                CF.Size = 16;
+                CF.Underline = UnderlineType.None;
+                ST.CharacterFormat = CF;
+                TempFlyout.Hide();
+            }
+        }
+
+        private void Template5_Click(object Sender, RoutedEventArgs EvArgs)
+        {
+            //Header
+            var ST = editor.Document.Selection;
+            if (!(ST == null))
+            {
+                var CF = ST.CharacterFormat;
+                CF.Bold = FormatEffect.Off;
+
+                CF.Italic = FormatEffect.Off;
+                CF.Name = "Segoe UI";
+
+                CF.Outline = FormatEffect.Off;
+                CF.Size = 14;
+                CF.Underline = UnderlineType.None;
+                ST.CharacterFormat = CF;
+                TempFlyout.Hide();
+            }
+        }
+
+        private void Template6_Click(object Sender, RoutedEventArgs EvArgs)
+        {
+            //Medium
+            var ST = editor.Document.Selection;
+            if (!(ST == null))
+            {
+                var CF = ST.CharacterFormat;
+                CF.Bold = FormatEffect.Off;
+
+                CF.Italic = FormatEffect.Off;
+                CF.Name = "Segoe UI";
+
+                CF.Outline = FormatEffect.Off;
+                CF.Size = 18;
+                CF.Underline = UnderlineType.None;
+                ST.CharacterFormat = CF;
+                TempFlyout.Hide();
+            }
+        }
+
+        private void Template7_Click(object Sender, RoutedEventArgs EvArgs)
+        {
+            //Subtitle
+            var ST = editor.Document.Selection;
+            if (!(ST == null))
+            {
+                var CF = ST.CharacterFormat;
+                CF.Bold = FormatEffect.Off;
+
+                CF.Italic = FormatEffect.Off;
+                CF.Name = "Segoe UI";
+
+                CF.Outline = FormatEffect.Off;
+                CF.Size = 20;
+                CF.Underline = UnderlineType.None;
+                ST.CharacterFormat = CF;
+                TempFlyout.Hide();
+            }
+        }
+
+        private void Template8_Click(object Sender, RoutedEventArgs EvArgs)
+        {
+            //Strong
+            var ST = editor.Document.Selection;
+            if (!(ST == null))
+            {
+                var CF = ST.CharacterFormat;
+                CF.Bold = FormatEffect.On;
+
+                CF.Italic = FormatEffect.Off;
+                CF.Name = "Segoe UI";
+
+                CF.Outline = FormatEffect.Off;
+                CF.Size = 18;
+                CF.Underline = UnderlineType.None;
+                ST.CharacterFormat = CF;
+                TempFlyout.Hide();
+            }
+        }
+
+        private void Template9_Click(object Sender, RoutedEventArgs EvArgs)
+        {
+            //Content
+            var ST = editor.Document.Selection;
+            if (!(ST == null))
+            {
+                var CF = ST.CharacterFormat;
+                CF.Bold = FormatEffect.Off;
+
+                CF.Italic = FormatEffect.Off;
+                CF.Name = "Segoe UI";
+
+                CF.Outline = FormatEffect.Off;
+                CF.Size = 16;
+                CF.Underline = UnderlineType.None;
+                ST.CharacterFormat = CF;
+                TempFlyout.Hide();
+            }
+        }
+
+        private void Template10_Click(object Sender, RoutedEventArgs EvArgs)
+        {
+            //Finished
+            var ST = editor.Document.Selection;
+            if (!(ST == null))
+            {
+                var CF = ST.CharacterFormat;
+                CF.Bold = FormatEffect.Off;
+
+                CF.Italic = FormatEffect.On;
+                CF.Name = "Segoe UI";
+
+                CF.Outline = FormatEffect.Off;
+                CF.Size = 14;
+                CF.Underline = UnderlineType.None;
+                ST.CharacterFormat = CF;
+                TempFlyout.Hide();
+            }
+        }
+
+        private void Template11_Click(object Sender, RoutedEventArgs EvArgs)
+        {
+            //Unfinished
+            var ST = editor.Document.Selection;
+            if (!(ST == null))
+            {
+                var CF = ST.CharacterFormat;
+                CF.Bold = FormatEffect.On;
+
+                CF.Italic = FormatEffect.Off;
+                CF.Name = "Segoe UI";
+
+                CF.Outline = FormatEffect.Off;
+                CF.Size = 14;
+                CF.Underline = UnderlineType.None;
+                ST.CharacterFormat = CF;
+                TempFlyout.Hide();
+            }
+        }
+
+        private void Template12_Click(object Sender, RoutedEventArgs EvArgs)
+        {
+            //Strong header
+            var ST = editor.Document.Selection;
+            if (!(ST == null))
+            {
+                var CF = ST.CharacterFormat;
+                CF.Bold = FormatEffect.Off;
+                CF.Italic = FormatEffect.On;
+                CF.Name = "Segoe UI";
+
+                CF.Outline = FormatEffect.Off;
+                CF.Size = 18;
+                CF.ForegroundColor = Colors.DimGray;
+                CF.Underline = UnderlineType.None;
+                ST.CharacterFormat = CF;
+                TempFlyout.Hide();
+            }
+        }
+
+
+        #endregion Templates
+
+        private async void more_symbols(object sender, RoutedEventArgs e)
+        {
+            // Create a ContentDialog
+            ContentDialog dialog = new ContentDialog();
+            dialog.Title = "Insert symbol";
+
+            // Create a ListView for the user to select the date format
+            ListView listView = new ListView();
+            listView.SelectionMode = ListViewSelectionMode.Single;
+
+            // Create a list of date formats to display in the ListView
+            List<string> symbols = new List<string>();
+            symbols.Add("×");
+            symbols.Add("÷");
+            symbols.Add("←");
+            symbols.Add("→");
+            symbols.Add("°");
+            symbols.Add("§");
+            symbols.Add("µ");
+            symbols.Add("π");
+            symbols.Add("α");
+            symbols.Add("β");
+            symbols.Add("γ");
+
+            // Set the ItemsSource of the ListView to the list of date formats
+            listView.ItemsSource = symbols;
+
+            // Set the content of the ContentDialog to the ListView
+            dialog.Content = listView;
+
+            // Make the insert button colored
+            dialog.DefaultButton = ContentDialogButton.Primary;
+
+            // Add an "Insert" button to the ContentDialog
+            dialog.PrimaryButtonText = "OK";
+            dialog.PrimaryButtonClick += (s, args) =>
+            {
+                string selectedFormat = listView.SelectedItem as string;
+                string formattedDate = symbols[listView.SelectedIndex];
+                editor.Document.Selection.Text = formattedDate;
+            };
+
+            // Add a "Cancel" button to the ContentDialog
+            dialog.SecondaryButtonText = "Cancel";
+
+            // Show the ContentDialog
+            await dialog.ShowAsync();
+        }
+
     }
 }

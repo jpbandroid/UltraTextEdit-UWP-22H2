@@ -12,7 +12,9 @@
     SecondaryButtonText="What's new in this version?"
     SecondaryButtonStyle="{ThemeResource ButtonRevealStyle}"
     SecondaryButtonClick="ButtonWhatsNew_Click"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    CornerRadius="8"
+Style="{StaticResource PivotTitleContentControlStyle}">
     <Grid Background="Transparent" BorderThickness="1">
         <Grid.RowDefinitions>
             <RowDefinition Height="48" />

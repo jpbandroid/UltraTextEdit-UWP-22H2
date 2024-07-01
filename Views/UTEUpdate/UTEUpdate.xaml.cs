@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MicaForUWP.Media;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -34,6 +35,43 @@ namespace UltraTextEdit_UWP.Views.UTEUpdate
         public UTEUpdate()
         {
             this.InitializeComponent();
+
+            if (BuildInfo.BeforeWin11)
+            {
+                if (App.Current.RequestedTheme == ApplicationTheme.Light)
+                {
+                    Application.Current.Resources["AppTitleBarBrush"] = new BackdropMicaBrush()
+                    {
+                        LuminosityOpacity = 0.8F,
+                        TintOpacity = 0F,
+                        BackgroundSource = BackgroundSource.WallpaperBackdrop,
+                        Opacity = 1,
+                        TintColor = Windows.UI.Color.FromArgb(255, 230, 230, 230),
+                        FallbackColor = Windows.UI.Color.FromArgb(255, 230, 230, 230)
+                    };
+                    this.Background = (Brush)Application.Current.Resources["AppTitleBarBrush"];
+                }
+                else
+                {
+                    Application.Current.Resources["AppTitleBarBrush"] = new BackdropMicaBrush()
+                    {
+                        LuminosityOpacity = 0.8F,
+                        TintOpacity = 0F,
+                        BackgroundSource = BackgroundSource.WallpaperBackdrop,
+                        Opacity = 1,
+                        TintColor = Windows.UI.Color.FromArgb(255, 25, 25, 25),
+                        FallbackColor = Windows.UI.Color.FromArgb(25, 25, 25, 25)
+                    };
+                    this.Background = (Brush)Application.Current.Resources["AppTitleBarBrush"];
+                }
+
+            }
+            else
+            {
+
+            }
+        
+
             var appViewTitleBar = ApplicationView.GetForCurrentView().TitleBar;
 
             appViewTitleBar.ButtonBackgroundColor = Colors.Transparent;

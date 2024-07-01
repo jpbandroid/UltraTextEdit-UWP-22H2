@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("jpb")]
 [assembly: AssemblyProduct("UltraTextEdit UWP")]
-[assembly: AssemblyCopyright("Copyright © 2023 jpb")]
+[assembly: AssemblyCopyright("Copyright © 2021-2024 jpb")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -23,6 +23,6 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("10.0.25314.321")]
-[assembly: AssemblyFileVersion("10.0.25314.1")]
+[assembly: AssemblyVersion("10.0.26100.1")]
+[assembly: AssemblyFileVersion("10.0.25941.1")]
 [assembly: ComVisible(false)]

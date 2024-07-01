@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    xmlns:muxc="using:Microsoft.UI.Xaml.Controls" xmlns:animatedvisuals="using:Microsoft.UI.Xaml.Controls.AnimatedVisuals" xmlns:Lang="using:UltraTextEdit_UWP.Helpers"  xmlns:res="using:UltraTextEdit_UWP.Strings" xmlns:uc="using:UltraTextEdit_UWP.UserControls" xmlns:local1="using:UltraTextEdit_UWP" xmlns:viewmodels="using:UltraTextEdit_UWP.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:SettingsViewModel}"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls" xmlns:animatedvisuals="using:Microsoft.UI.Xaml.Controls.AnimatedVisuals" xmlns:Lang="using:UltraTextEdit_UWP.Helpers"  xmlns:res="using:UltraTextEdit_UWP.Strings" xmlns:uc="using:UltraTextEdit_UWP.UserControls" xmlns:local1="using:UltraTextEdit_UWP" xmlns:viewmodels="using:UltraTextEdit_UWP.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:SettingsViewModel}" xmlns:settings="using:CommunityToolkit.WinUI.Controls"
     muxc:BackdropMaterial.ApplyToRootOrPageBackground="True">
 
     <Grid>
@@ -93,6 +93,14 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
                 </uc:SettingsBlockControl>
+                <uc:SettingsBlockControl Title="Spell check">
+                    <uc:SettingsBlockControl.Icon>
+                        <FontIcon Glyph="&#xF87B;" />
+                    </uc:SettingsBlockControl.Icon>
+                    <uc:SettingsBlockControl.SettingsActionableElement>
+                        <CheckBox x:Name="spellcheckBox" Checked="spellcheckBox_Checked" Unchecked="spellcheckBox_Unchecked" Margin="0,0,-100,0"/>
+                    </uc:SettingsBlockControl.SettingsActionableElement>
+                </uc:SettingsBlockControl>
                 <TextBlock Text="{x:Bind res:Resources.AppearenceHeaderName}" Margin="0,0,0,10" FontSize="18" FontWeight="SemiBold" />
 
                 <uc:SettingsBlockControl Title="{x:Bind res:Resources.ThemeSettingName}">
@@ -109,15 +117,21 @@
                 </uc:SettingsBlockControl>
 
                 
-                <!--
+                
                 <uc:SettingsBlockControl Title="Language">
-                    <ComboBox x:Name="CmbLanguage" 
-          ItemsSource="{Binding Languages}" 
-          DisplayMemberPath="DisplayName" 
-          SelectedValuePath="LanguageCode" 
-          SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}" />
+                    <StackPanel Orientation="Horizontal">
+                        <ComboBox x:Name="CmbLanguage" 
+ItemsSource="{x:Bind Languages}"
+/>
+                        <Button Click="Button_Click">
+                            <IconSourceElement>
+                                <SymbolIconSource Symbol="Sync">
+                                </SymbolIconSource>
+                            </IconSourceElement>
+                        </Button>
+                    </StackPanel>
                 </uc:SettingsBlockControl>
-                -->
+                
                 <uc:SettingsBlockControl Title="Sound" Icon="Volume">
                     <uc:SettingsBlockControl.SettingsActionableElement>
                         <ToggleSwitch x:Name="soundToggle" OffContent="Sound Off" OnContent="Sound On" Toggled="soundToggle_Toggled"/>
@@ -128,34 +142,48 @@
                         <FontIcon Glyph="&#xE7F5;" />
                     </uc:SettingsBlockControl.Icon>
                     <uc:SettingsBlockControl.SettingsActionableElement>
-                        <CheckBox x:Name="spatialAudioBox" IsEnabled="False" Checked="spatialAudioBox_Checked" Unchecked="spatialAudioBox_Unchecked"/>
+                        <CheckBox x:Name="spatialAudioBox" IsEnabled="False" Checked="spatialAudioBox_Checked" Unchecked="spatialAudioBox_Unchecked" Margin="0,0,-100,0"/>
                     </uc:SettingsBlockControl.SettingsActionableElement>
                 </uc:SettingsBlockControl>
-                <muxc:Expander Header="Focus Visuals settings">
-                    <StackPanel>
-                        <RadioButton x:Name="HighVisibility" Content="High Visibility" Checked="HighVisibility_Checked"/>
-                        <RadioButton x:Name="RevealFocus" Content="Reveal Focus"  Checked="RevealFocus_Checked"/>
-                    </StackPanel>
-                </muxc:Expander>
+                <settings:SettingsExpander Header="Focus Visuals settings">
+                    <settings:SettingsExpander.Items>
+                        <settings:SettingsCard HorizontalContentAlignment="Left"
+                                               ContentAlignment="Left">
+                            <StackPanel>
+                                <RadioButton x:Name="HighVisibility" Content="High Visibility" Checked="HighVisibility_Checked"/>
+                                <RadioButton x:Name="RevealFocus" Content="Reveal Focus"  Checked="RevealFocus_Checked"/>
+                            </StackPanel>
+                        </settings:SettingsCard>
+                    </settings:SettingsExpander.Items>
+                </settings:SettingsExpander>
                 <TextBlock Text="{x:Bind res:Resources.AboutText}" Margin="0,0,0,10" FontSize="18" FontWeight="SemiBold" />
 
-                <uc:SettingsBlockControl x:Name="aboutblock"
-            Title="{x:Bind res:Resources.AppName}"
-            Description="10.0.25314.321">
-                    <uc:SettingsBlockControl.Icon>
+                <settings:SettingsCard x:Name="aboutblock"
+            Header="UltraTextEdit UWP"
+            Description="10.0.26100.1">
+                    <settings:SettingsCard.HeaderIcon>
                         <BitmapIcon UriSource="ms-appx:///Assets/utevericon.png" ShowAsMonochrome="False" Height="24" Width="24"/>
-                    </uc:SettingsBlockControl.Icon>
+                    </settings:SettingsCard.HeaderIcon>
                     <Button
-                ToolTipService.ToolTip="{x:Bind res:Resources.CopyText}"
+                ToolTipService.ToolTip="Copy"
                 Click="CopyVerInfo">
                         <FontIcon Glyph="&#xE8C8;"/>
                     </Button>
-                </uc:SettingsBlockControl>
+                </settings:SettingsCard>
                 <uc:SettingsBlockControl x:Name="updateblock"
             Title="UTE Update"
             IsClickable="True"
             Click="UpdateButton_Click"
             Icon="Sync">
+                    <FontIcon HorizontalAlignment="Right" Glyph="&#xE76C;" Height="24" Width="24" FontSize="12"/>
+                </uc:SettingsBlockControl>
+                <uc:SettingsBlockControl x:Name="vidsblock"
+Title="Velocity IDs"
+IsClickable="True"
+Click="VIDsButton_Click">
+                    <uc:SettingsBlockControl.Icon>
+                        <FontIcon Glyph="&#xEC7A;" />
+                    </uc:SettingsBlockControl.Icon>
                     <FontIcon HorizontalAlignment="Right" Glyph="&#xE76C;" Height="24" Width="24" FontSize="12"/>
                 </uc:SettingsBlockControl>
             </StackPanel>

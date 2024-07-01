@@ -29,6 +29,8 @@ using System.Text;
 using Windows.UI.Xaml.Media.Imaging;
 using UltraTextEdit_UWP.Dialogs;
 using System.Runtime.CompilerServices;
+using MicaForUWP.Media;
+using Microsoft.UI.Xaml.Controls;
 
 namespace UltraTextEdit_UWP
 {
@@ -43,6 +45,41 @@ namespace UltraTextEdit_UWP
         public NonTabbedMainPage()
         {
             InitializeComponent();
+
+            if (BuildInfo.BeforeWin11)
+            {
+                if (App.Current.RequestedTheme == ApplicationTheme.Light)
+                {
+                    Application.Current.Resources["AppTitleBarBrush"] = new BackdropMicaBrush()
+                    {
+                        LuminosityOpacity = 0.8F,
+                        TintOpacity = 0F,
+                        BackgroundSource = BackgroundSource.WallpaperBackdrop,
+                        Opacity = 1,
+                        TintColor = Windows.UI.Color.FromArgb(255, 230, 230, 230),
+                        FallbackColor = Windows.UI.Color.FromArgb(255, 230, 230, 230)
+                    };
+                    this.Background = (Brush)Application.Current.Resources["AppTitleBarBrush"];
+                }
+                else
+                {
+                    Application.Current.Resources["AppTitleBarBrush"] = new BackdropMicaBrush()
+                    {
+                        LuminosityOpacity = 0.8F,
+                        TintOpacity = 0F,
+                        BackgroundSource = BackgroundSource.WallpaperBackdrop,
+                        Opacity = 1,
+                        TintColor = Windows.UI.Color.FromArgb(255, 25, 25, 25),
+                        FallbackColor = Windows.UI.Color.FromArgb(25, 25, 25, 25)
+                    };
+                    this.Background = (Brush)Application.Current.Resources["AppTitleBarBrush"];
+                }
+
+            }
+            else
+            {
+
+            }
 
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
 
@@ -70,15 +107,36 @@ namespace UltraTextEdit_UWP
 
             ShareSourceLoad();
 
-            var settings = new SettingsPage();
-
-            if (settings.gameenabled == true)
+            var LocalSettings = ApplicationData.Current.LocalSettings;
+            if (LocalSettings.Values["SpellCheck"] != null)
             {
-                textsplitview.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "ms-appx:///Assets/gamerbackground.png")), Stretch = Stretch.Fill };
+                if (LocalSettings.Values["SpellCheck"].ToString() == "On")
+                {
+                    editor.IsSpellCheckEnabled = true;
+                }
+                else
+                {
+                    editor.IsSpellCheckEnabled = false;
+                }
             }
             else
             {
-                textsplitview.Background = new SolidColorBrush(Colors.Transparent);
+                LocalSettings.Values["SpellCheck"] = "Off";
+            }
+            if (LocalSettings.Values["NewFindReplaceVID"] != null)
+            {
+                if (LocalSettings.Values["NewFindReplaceVID"].ToString() == "On")
+                {
+                    findreplacepanel.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    findreplacepanel.Visibility = Visibility.Collapsed;
+                }
+            }
+            else
+            {
+                LocalSettings.Values["NewFindReplaceVID"] = "Off";
             }
 
         }
@@ -360,8 +418,11 @@ namespace UltraTextEdit_UWP
         private async void OpenButton_Click(object sender, RoutedEventArgs e)
         {
             // Open a text file.
-            FileOpenPicker open = new();
-            open.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            FileOpenPicker open = new()
+            {
+                SuggestedStartLocation = PickerLocationId.DocumentsLibrary
+            };
+
             open.FileTypeFilter.Add(".rtf");
             open.FileTypeFilter.Add(".txt");
 
@@ -377,7 +438,9 @@ namespace UltraTextEdit_UWP
                     string text = reader.ReadString(buffer.Length);
                     // Load the file into the Document property of the RichEditBox.
                     editor.Document.LoadFromStream(TextSetOptions.FormatRtf, randAccStream);
+                    editor.Document.GetText(TextGetOptions.UseObjectText, out originalDocText);
                     //editor.Document.SetText(Windows.UI.Text.TextSetOptions.FormatRtf, text);
+                    (BasePage.Current.Tabs.TabItems[BasePage.Current.Tabs.SelectedIndex] as TabViewItem).Header = file.Name;
                     AppTitle.Text = file.Name + " - " + appTitleStr;
                     fileNameWithPath = file.Path;
                 }
@@ -429,13 +492,19 @@ namespace UltraTextEdit_UWP
         {
             // Extract the color of the button that was clicked.
             Button clickedColor = (Button)sender;
-            var rectangle = (Windows.UI.Xaml.Shapes.Rectangle)clickedColor.Content;
+            var borderone = (Windows.UI.Xaml.Controls.Border)clickedColor.Content;
+            var bordertwo = (Windows.UI.Xaml.Controls.Border)borderone.Child;
+            var rectangle = (Windows.UI.Xaml.Shapes.Rectangle)bordertwo.Child;
             var color = (rectangle.Fill as SolidColorBrush).Color;
 
             editor.Document.Selection.CharacterFormat.ForegroundColor = color;
-
-            fontColorButton.Flyout.Hide();
+            //FontColorMarker.SetValue(ForegroundProperty, new SolidColorBrush(color));
             editor.Focus(FocusState.Keyboard);
+        }
+
+        private void fontcolorsplitbutton_Click(Microsoft.UI.Xaml.Controls.SplitButton sender, Microsoft.UI.Xaml.Controls.SplitButtonClickEventArgs args)
+        {
+            // If you see this, remind me to look into the splitbutton color applying logic
         }
 
         private void AddLinkButton_Click(object sender, RoutedEventArgs e)
@@ -472,17 +541,10 @@ namespace UltraTextEdit_UWP
             editor.Document.Redo();
         }
 
-        private async Task DisplayAboutDialog()
+        private Task DisplayAboutDialog()
         {
-            ContentDialog aboutDialog = new()
-            {
-                Title = appTitleStr,
-                Content = $"Version {typeof(App).GetTypeInfo().Assembly.GetName().Version}\n\n© 2021-2023 jpb",
-                CloseButtonText = "OK",
-                DefaultButton = ContentDialogButton.Close
-            };
-
-            await aboutDialog.ShowAsync();
+            AboutBox.Open();
+            return Task.CompletedTask;
         }
 
         public async Task ShowUnsavedDialog()
@@ -734,9 +796,32 @@ namespace UltraTextEdit_UWP
 
         private void editor_SelectionChanged(object sender, RoutedEventArgs e)
         {
+            var ST = editor.Document.Selection;
             BoldButton.IsChecked = editor.Document.Selection.CharacterFormat.Bold == FormatEffect.On;
             ItalicButton.IsChecked = editor.Document.Selection.CharacterFormat.Italic == FormatEffect.On;
             UnderlineButton.IsChecked = editor.Document.Selection.CharacterFormat.Underline == UnderlineType.Single;
+            //Selected words
+            if (ST.Length > 0 || ST.Length < 0)
+            {
+                SelWordGrid.Visibility = Visibility.Visible;
+                editor.Document.Selection.GetText(TextGetOptions.None, out var seltext);
+                var selwordcount = seltext.Split(new char[] { ' ', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries).Length;
+                SelWordCount.Text = $"Selected words: {selwordcount}";
+            }
+            else
+            {
+                SelWordGrid.Visibility = Visibility.Collapsed;
+            }
+            editor.Document.GetText(TextGetOptions.None, out var text);
+            if (text.Length > 0)
+            {
+                var wordcount = text.Split(new char[] { ' ', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries).Length;
+                WordCount.Text = $"Word count: {wordcount}";
+            }
+            else
+            {
+                WordCount.Text = $"Word count: 0";
+            }
         }
 
         //To see this code in action, add a call to ShareSourceLoad to your constructor or other
@@ -923,6 +1008,151 @@ namespace UltraTextEdit_UWP
         {
             var dialog = new WhatsNewDialog();
             dialog.ShowAsync();
+        }
+
+        private void NoneNumeral_Click(object sender, RoutedEventArgs e)
+        {
+            editor.Document.Selection.ParagraphFormat.ListType = MarkerType.None;
+            myListButton.IsChecked = false;
+            myListButton.Flyout.Hide();
+            editor.Focus(FocusState.Keyboard);
+        }
+
+        private void DottedNumeral_Click(object sender, RoutedEventArgs e)
+        {
+            editor.Document.Selection.ParagraphFormat.ListType = MarkerType.Bullet;
+            myListButton.IsChecked = true;
+            myListButton.Flyout.Hide();
+            editor.Focus(FocusState.Keyboard);
+        }
+
+        private void NumberNumeral_Click(object sender, RoutedEventArgs e)
+        {
+            editor.Document.Selection.ParagraphFormat.ListType = MarkerType.Arabic;
+            myListButton.IsChecked = true;
+            myListButton.Flyout.Hide();
+            editor.Focus(FocusState.Keyboard);
+        }
+
+        private void LetterSmallNumeral_Click(object sender, RoutedEventArgs e)
+        {
+            editor.Document.Selection.ParagraphFormat.ListType = MarkerType.LowercaseEnglishLetter;
+            myListButton.IsChecked = true;
+            myListButton.Flyout.Hide();
+            editor.Focus(FocusState.Keyboard);
+        }
+
+        private void LetterBigNumeral_Click(object sender, RoutedEventArgs e)
+        {
+            editor.Document.Selection.ParagraphFormat.ListType = MarkerType.UppercaseEnglishLetter;
+            myListButton.IsChecked = true;
+            myListButton.Flyout.Hide();
+            editor.Focus(FocusState.Keyboard);
+        }
+
+        private void SmalliNumeral_Click(object sender, RoutedEventArgs e)
+        {
+            editor.Document.Selection.ParagraphFormat.ListType = MarkerType.LowercaseRoman;
+            myListButton.IsChecked = true;
+            myListButton.Flyout.Hide();
+            editor.Focus(FocusState.Keyboard);
+        }
+
+        private void BigINumeral_Click(object sender, RoutedEventArgs e)
+        {
+            editor.Document.Selection.ParagraphFormat.ListType = MarkerType.UppercaseRoman;
+            myListButton.IsChecked = true;
+            myListButton.Flyout.Hide();
+            editor.Focus(FocusState.Keyboard);
+        }
+
+        private void BackPicker_ColorChanged(object Sender, Windows.UI.Xaml.Controls.ColorChangedEventArgs EvArgs)
+        {
+            //Configure font highlight
+            if (!(editor == null))
+            {
+                var ST = editor.Document.Selection;
+                if (!(ST == null))
+                {
+                    _ = ST.CharacterFormat;
+                    var Br = new SolidColorBrush(BackPicker.Color);
+                    var CF = BackPicker.Color;
+                    if (BackAccent != null) BackAccent.Foreground = Br;
+                    ST.CharacterFormat.BackgroundColor = CF;
+                }
+            }
+        }
+
+        private void HighlightButton_Click(object Sender, RoutedEventArgs EvArgs)
+        {
+            //Configure font color
+            var BTN = Sender as Button;
+            var ST = editor.Document.Selection;
+            if (!(ST == null))
+            {
+                _ = ST.CharacterFormat.ForegroundColor;
+                var Br = BTN.Foreground;
+                BackAccent.Foreground = Br;
+                ST.CharacterFormat.BackgroundColor = (BTN.Foreground as SolidColorBrush).Color;
+            }
+        }
+
+        private void NullHighlightButton_Click(object Sender, RoutedEventArgs EvArgs)
+        {
+            //Configure font color
+            var ST = editor.Document.Selection;
+            if (!(ST == null))
+            {
+                _ = ST.CharacterFormat.ForegroundColor;
+                BackAccent.Foreground = new SolidColorBrush(Colors.Transparent);
+                ST.CharacterFormat.BackgroundColor = Colors.Transparent;
+            }
+        }
+
+        private void HyperlinkButton_Click_1(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void HyperlinkButton_Click_2(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void HyperlinkButton_Click_3(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void HyperlinkButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void find_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            FindBoxHighlightMatches();
+        }
+
+        private void replace_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        {
+            editor.Replace(false, replace.Text);
+        }
+
+        private void AppBarButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ReplacePanel.Visibility == Visibility.Visible)
+            {
+                ReplacePanel.Visibility = Visibility.Collapsed;
+                buticon.Glyph = "\uE7B3";
+                ToolTipService.SetToolTip(replacecontrol, "Show Replace box");
+            }
+            else
+            {
+                ReplacePanel.Visibility = Visibility.Visible;
+                buticon.Glyph = "\uED1A";
+                ToolTipService.SetToolTip(replacecontrol, "Hide Replace box");
+            }
         }
     }
 }

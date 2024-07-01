@@ -9,13 +9,16 @@
     PrimaryButtonText="OK"
     PrimaryButtonStyle="{ThemeResource AccentButtonStyle}"
     Title="What's new"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    CornerRadius="8"
+Style="{StaticResource PivotTitleContentControlStyle}">
 
     <Grid>
         <TextBlock x:Name="ChangelogText" TextWrapping="WrapWholeWords">
-            • Updates Win2D.uwp to version 1.27.0-preview3<LineBreak />
-            • Updates Microsoft.NETCore.Platforms and System.Text.Json to version 7.0.3<LineBreak />
-            • Updates Microsoft.Web.WebView2 to version 1.0.1823.32
+            <LineBreak />
+            • Add Text Templates<LineBreak />
+            • Add an extra symbols dialog to the Symbols Menu<LineBreak />
+            • Add Justify text alignment<LineBreak />
         </TextBlock>
     </Grid>
 </ContentDialog>

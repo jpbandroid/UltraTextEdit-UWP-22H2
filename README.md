@@ -1,6 +1,11 @@
-# UltraTextEdit UWP
+# UltraTextEdit UWP [![Crowdin](https://badges.crowdin.net/ultratextedit-uwp/localized.svg)](https://crowdin.com/project/ultratextedit-uwp)
 
 NOTE: The UltraTextEdit UWP 22H2 codebase is a fork of TowPad by itsWindows11. Link: https://github.com/itsWindows11/TowPad
+<br>NOTE: UTE UWP will now get more updates (after 24H2; the other repo will also have its own 24H2) here: https://github.com/jpbandroid/UTE-UWP-Plus
+<br><b>Help with translations on Crowdin would be greatly appreciated! https://crowdin.com/project/ultratextedit-uwp</b>
+<br>
+Join the official Discord server to get exclusive sneek peeks and development updates!
+https://discord.gg/cjxyyr6r2G
 
 ### Windows 11
 ![image](https://user-images.githubusercontent.com/100033309/210171690-1b38c220-0cf6-4e84-86a5-8eec80460667.png)
@@ -48,6 +53,35 @@ Aero Lite Dark
   
   - ... and more!
   
+
+### Install the certificate (required only for first installs or changes of certificate, this only happens yearly on June 24)
+1. Download and double-click certificate file (file extension .cer)
+2. Click _Install Cerificate_
+3. Select Local Machine option
+4. Click _Next_
+5. Accept UAC (User Account Control) prompt [click _Yes_]
+6. Select _Place all certificates in the following store_
+7. Click _Browse_
+8. Select **Trusted Root Cerification Authorities** and click OK
+9. Click _Next_
+10. Check that window looks like the following:
+![image](https://user-images.githubusercontent.com/100033309/161593278-20d800bf-5132-4454-b237-8b86939f243e.png)
+13. Click _Finish_
+14. You are done! Now you can install this app by downloading (if you haven't already!) and double-clicking the .msixbundle file
+
+
+### Contributors
+Code contributors:
+<a href="https://github.com/jpbandroid/UltraTextEdit-UWP-22H2/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=jpbandroid/UltraTextEdit-UWP-22H2" />
+</a>
+
+Made with [contrib.rocks](https://contrib.rocks).
+
+Localization/translation contributors (will be updated with every merged Crowdin sync):
+- jpbandroid (English, Polish, French, German)
+- Ronner/Ronner231 (Russian)
+- LuisYeah1234 (Italian)
 
 ### Install the certificate (required only for first installs or changes of certificate, this only happens yearly on June 24)
 1. Download and double-click certificate file (file extension .cer)
