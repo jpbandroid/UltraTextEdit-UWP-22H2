@@ -96,15 +96,15 @@
                     </StackPanel>
                 </Border>
                 <Grid x:Name="InsiderGrid">
-                    <Button Background="#FFFFC225" Width="50" Height="25" Padding="0" CornerRadius="8" Click="showinsiderinfo">
+                    <Button Background="#50E6FF" Width="50" Height="25" Padding="0" CornerRadius="8" Click="showinsiderinfo">
                         <Grid>
-                            <TextBlock Text="DEV" TextAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"></TextBlock>
+                            <TextBlock Text="BETA" TextAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"></TextBlock>
                         </Grid>
                     </Button>
                     <muxc:TeachingTip x:Name="ToggleThemeTeachingTip1"
-    Target="{x:Bind InsiderGrid}"
-    Title="Dev Channel"
-    Subtitle="The Dev Channel is the Insider Channel that receives builds with the latest features and may contain features that may not get released to the public. Beware, as these builds may be buggy or crash!">
+Target="{x:Bind InsiderGrid}"
+Title="Beta Channel"
+Subtitle="The Beta Channel is the Insider Channel that receives updates for the next Moment update or finalized major build, and is more stable than Dev, but less stable than Release Preview/RP.">
                         <muxc:TeachingTip.IconSource>
                             <muxc:FontIconSource  Glyph="&#xF1AD;"/>
                         </muxc:TeachingTip.IconSource>
@@ -1182,7 +1182,7 @@
                     <Grid Margin="10,0,10,0">
                         <Image HorizontalAlignment="Left" Height="90" Margin="5,5,0,0" VerticalAlignment="Top" Width="90" Source="/Assets/utevericon.png"/>
                         <TextBlock Foreground="{ThemeResource DefaultTextForegroundThemeBrush}" HorizontalAlignment="Left" Margin="120,20,0,0" TextWrapping="Wrap" Text="UltraTextEdit UWP" VerticalAlignment="Top" FontSize="16"/>
-                        <TextBlock Foreground="{ThemeResource DefaultTextForegroundThemeBrush}" HorizontalAlignment="Left" Margin="120,50,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="11">Version 10.0.26100.1 - Dev Channel<LineBreak/>Copyright ©️ jpb/ErrorTek 2021-2024, © Ivirius 2023-2024
+                        <TextBlock Foreground="{ThemeResource DefaultTextForegroundThemeBrush}" HorizontalAlignment="Left" Margin="120,50,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="11">Version 10.0.26100.1 - Beta Channel<LineBreak/>Copyright ©️ jpb/ErrorTek 2021-2024, © Ivirius 2023-2024
 <LineBreak/>Licensed under the MIT License</TextBlock>
                         <StackPanel Margin="0,120,0,0">
                             <HyperlinkButton Content="WinUI 2.8.6" Click="HyperlinkButton_Click"/>
